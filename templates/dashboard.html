@@ -1,0 +1,873 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | EduGenie AI</title>
+    
+    <!-- CSS Dependencies -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/static/css/style.css?v=20261020_01">
+</head>
+<body>
+    <!-- Background Particles -->
+    <div id="particles-js"></div>
+
+    <div class="dashboard-container">
+        <!-- Sidebar Navigation -->
+        <div class="sidebar glass">
+            <div class="sidebar-brand text-gradient">
+                <i class="fas fa-brain"></i>
+                <span>EduGenie</span>
+            </div>
+            
+            <ul class="sidebar-menu">
+                <li>
+                    <a class="sidebar-link active" onclick="switchModule('overview')">
+                        <i class="fas fa-chart-line"></i> Dashboard
+                    </a>
+                </li>
+                <li>
+                    <a class="sidebar-link" onclick="switchModule('chat')">
+                        <i class="fas fa-comments"></i> AI Chat
+                    </a>
+                </li>
+                <li>
+                    <a class="sidebar-link" onclick="switchModule('qa')">
+                        <i class="fas fa-question-circle"></i> Ask AI (Q&A)
+                    </a>
+                </li>
+                <li>
+                    <a class="sidebar-link" onclick="switchModule('explain')">
+                        <i class="fas fa-graduation-cap"></i> Concept Explainer
+                    </a>
+                </li>
+                <li>
+                    <a class="sidebar-link" onclick="switchModule('quiz')">
+                        <i class="fas fa-tasks"></i> Quiz Generator
+                    </a>
+                </li>
+                <li>
+                    <a class="sidebar-link" onclick="switchModule('roadmap')">
+                        <i class="fas fa-map-marked-alt"></i> Learning Roadmap
+                    </a>
+                </li>
+                <li>
+                    <a class="sidebar-link" onclick="switchModule('summarize')">
+                        <i class="fas fa-file-contract"></i> Summarizer
+                    </a>
+                </li>
+                <li>
+                    <a class="sidebar-link" onclick="switchModule('homework')">
+                        <i class="fas fa-pencil-ruler"></i> Homework Helper
+                    </a>
+                </li>
+                <li>
+                    <a class="sidebar-link" onclick="switchModule('flashcards')">
+                        <i class="fas fa-clone"></i> Flashcards
+                    </a>
+                </li>
+                <li>
+                    <a class="sidebar-link" onclick="switchModule('document')">
+                        <i class="fas fa-file-pdf text-danger"></i> PDF & Doc Analyzer <span class="badge bg-primary ms-1" style="font-size: 0.65rem;">NEW</span>
+                    </a>
+                </li>
+                <li>
+                    <a class="sidebar-link" onclick="switchModule('bookmarks')">
+                        <i class="fas fa-bookmark"></i> Bookmarks & Notes
+                    </a>
+                </li>
+                <li>
+                    <a class="sidebar-link" onclick="switchModule('profile')">
+                        <i class="fas fa-user-circle"></i> Profile
+                    </a>
+                </li>
+                <li>
+                    <a class="sidebar-link" onclick="switchModule('settings')">
+                        <i class="fas fa-cog"></i> AI Settings
+                    </a>
+                </li>
+                <!-- Admin specific link (shown via JS if role is admin) -->
+                <li>
+                    <a class="sidebar-link" id="sidebar-admin-link" onclick="switchModule('admin')" style="display: none;">
+                        <i class="fas fa-shield-alt text-danger"></i> Admin Panel
+                    </a>
+                </li>
+            </ul>
+            
+            <div class="sidebar-footer border-top border-secondary pt-2">
+                <button class="btn btn-sm btn-outline-danger w-100" onclick="logout()">
+                    <i class="fas fa-sign-out-alt me-2"></i> Logout
+                </button>
+            </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="main-content glass">
+            <!-- Content Header -->
+            <div class="main-content-header">
+                <div>
+                    <h4 class="m-0 fw-bold">Welcome, <span class="text-gradient user-display-name">Learner</span>!</h4>
+                    <small class="text-muted">Study Streak: <span class="streak-display">1 Day</span> 🔥</small>
+                </div>
+                
+                <div class="d-flex align-items-center gap-3">
+                    <div class="search-bar-wrapper">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="dashboardSearch" class="form-control" placeholder="Search notes & chats...">
+                    </div>
+                    
+                    <button class="btn btn-outline-secondary rounded-circle" id="themeToggleBtn" onclick="toggleTheme()" style="width: 42px; height: 42px; display: flex; align-items: center; justify-content: center;">
+                        <i id="theme-toggle-icon" class="fas fa-sun"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- TAB 1: OVERVIEW -->
+            <div id="overview-module" class="module-view active">
+                <h3 class="mb-4 text-gradient">Your Learning Overview</h3>
+                <div class="row mb-5">
+                    <div class="col-md-4 mb-3">
+                        <div class="glass-card stat-card">
+                            <div class="stat-icon bg-primary text-white"><i class="fas fa-fire"></i></div>
+                            <div>
+                                <h3 class="m-0 streak-display">1 Day</h3>
+                                <small class="text-muted">Learning Streak</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="glass-card stat-card">
+                            <div class="stat-icon bg-secondary text-white"><i class="fas fa-graduation-cap"></i></div>
+                            <div>
+                                <h3 id="overviewTotalTasks" class="m-0">0 Tasks</h3>
+                                <small class="text-muted">Completed AI Generations</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-3">
+                        <div class="glass-card stat-card">
+                            <div class="stat-icon bg-accent text-white"><i class="fas fa-history"></i></div>
+                            <div>
+                                <h6 class="m-0 text-truncate" id="overviewRecentPrompt" style="max-width: 150px;">None</h6>
+                                <small class="text-muted">Last Query Submitted</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-lg-8 mb-4">
+                        <div class="glass p-4 h-100">
+                            <h5 class="fw-bold mb-3"><i class="far fa-compass me-2 text-primary"></i>Quick Starter Prompts</h5>
+                            <p class="text-muted small">Choose a concept to explain instantly:</p>
+                            <div class="d-flex flex-wrap gap-2 mt-3">
+                                <button class="btn btn-sm btn-premium-outline" onclick="switchModule('explain'); document.getElementById('explainPrompt').value='Quantum Computing'; callAI('explain', 'explainPrompt', 'explainResult')">Quantum Computing</button>
+                                <button class="btn btn-sm btn-premium-outline" onclick="switchModule('qa'); document.getElementById('qaPrompt').value='What is database indexing?'; callAI('qa', 'qaPrompt', 'qaResult')">Database Indexing</button>
+                                <button class="btn btn-sm btn-premium-outline" onclick="switchModule('roadmap'); document.getElementById('roadmapPrompt').value='Full Stack Developer'; callAI('roadmap', 'roadmapPrompt', 'roadmapResult')">Full Stack Roadmap</button>
+                                <button class="btn btn-sm btn-premium-outline" onclick="switchModule('chat'); document.getElementById('chatPrompt').value='Help me practice coding exercises in Python.'; callAI('chat', 'chatPrompt', 'chatResult')">Code Exercises</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-4 mb-4">
+                        <div class="glass p-4 h-100 text-center d-flex flex-column justify-content-center align-items-center">
+                            <h2 class="text-gradient-purple font-weight-bold">Learn Smarter.</h2>
+                            <p class="text-muted small mt-2">Use the sidebar to explore AI quiz modules, roadmaps, study flashcards, and textbook summarizers.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 2: AI CHAT -->
+            <div id="chat-module" class="module-view">
+                <h3>AI Chat Assistant</h3>
+                <p class="text-muted">Chat naturally with EduGenie. Context history is remembered automatically.</p>
+                <div class="chat-window glass p-3 mt-4">
+                    <div class="chat-history-box" id="chat-history-container">
+                        <div class="message-bubble assistant">
+                            <div class="message-avatar">EG</div>
+                            <div class="message-content">Hello! I am EduGenie, your interactive study buddy. How can I help you master your classes today?</div>
+                        </div>
+                    </div>
+                    
+                    <div id="loader-chat" class="loader"></div>
+                    
+                    <div class="chat-input-wrapper mt-3">
+                        <textarea id="chatPrompt" class="form-control" rows="2" placeholder="Ask me anything (e.g. Write a quick sort algorithm in Javascript)"></textarea>
+                        <button class="btn btn-premium px-4" onclick="callAI('chat', 'chatPrompt', 'chat-history-container')"><i class="fas fa-paper-plane"></i></button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 3: QUESTION ANSWERING -->
+            <div id="qa-module" class="module-view">
+                <h3>Intelligent Q&A Solver</h3>
+                <p class="text-muted">Enter any target question to fetch core definitions, working examples, interview questions, and deep dives.</p>
+                <div class="glass p-4 mt-4">
+                    <div class="mb-3">
+                        <label for="qaPrompt" class="form-label">Type your academic question</label>
+                        <textarea id="qaPrompt" class="form-control" rows="3" placeholder="E.g., What is SQL? How does it differ from NoSQL?"></textarea>
+                    </div>
+                    <button class="btn btn-premium btn-sm" onclick="callAI('qa', 'qaPrompt', 'qaResult')">Submit Question</button>
+                    
+                    <div id="loader-qa" class="loader"></div>
+                    <div id="qaResult" class="result-box mt-4">Structured answers will stream here...</div>
+                </div>
+            </div>
+
+            <!-- TAB 4: CONCEPT EXPLAINER -->
+            <div id="explain-module" class="module-view">
+                <h3>Concept Explainer</h3>
+                <p class="text-muted">Break down highly complex theoretical topics. Select your target comprehension tier.</p>
+                <div class="glass p-4 mt-4">
+                    <div class="mb-4">
+                        <label for="explainPrompt" class="form-label">Concept to explain</label>
+                        <input type="text" id="explainPrompt" class="form-control" placeholder="E.g. Blockchain, Recursion, Photosynthesis">
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label d-block">Comprehension Level</label>
+                        <div class="btn-group w-100" role="group">
+                            <input type="radio" class="btn-check" name="explainLevel" id="level1" value="10 year old" checked>
+                            <label class="btn btn-outline-primary" for="level1">Explain Like I'm 10</label>
+                            
+                            <input type="radio" class="btn-check" name="explainLevel" id="level2" value="College Student">
+                            <label class="btn btn-outline-primary" for="level2">College Student</label>
+                            
+                            <input type="radio" class="btn-check" name="explainLevel" id="level3" value="Professional">
+                            <label class="btn btn-outline-primary" for="level3">Professional Expert</label>
+                        </div>
+                    </div>
+                    
+                    <button class="btn btn-premium btn-sm" onclick="callAI('explain', 'explainPrompt', 'explainResult', {difficulty: document.querySelector('input[name=explainLevel]:checked').value})">Explain Concept</button>
+                    
+                    <div id="loader-explain" class="loader"></div>
+                    <div id="explainResult" class="result-box mt-4">Visual breakdown will stream here...</div>
+                </div>
+            </div>
+
+            <!-- TAB 5: QUIZ GENERATOR -->
+            <div id="quiz-module" class="module-view">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <h3>Interactive Quiz Generator</h3>
+                    <div id="quiz-timer-text" class="quiz-timer" style="display: none;">
+                        <i class="far fa-clock"></i> Time: 00:00
+                    </div>
+                </div>
+                <p class="text-muted">Generate a 5-question test paper on any topic to test your knowledge.</p>
+                
+                <div class="glass p-4 mt-4">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="quizPrompt" class="form-label">Subject / Topic</label>
+                            <input type="text" id="quizPrompt" class="form-control" placeholder="E.g. Python Basics, Calculus, World War II">
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label for="quizDifficulty" class="form-label">Difficulty</label>
+                            <select id="quizDifficulty" class="form-select">
+                                <option value="Easy">Easy</option>
+                                <option value="Medium" selected>Medium</option>
+                                <option value="Hard">Hard</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label for="quizType" class="form-label">Quiz Type</label>
+                            <select id="quizType" class="form-select">
+                                <option value="MCQs" selected>MCQs (Multiple Choice)</option>
+                                <option value="True/False">True / False</option>
+                                <option value="Fill in the blanks">Fill in the Blanks</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button class="btn btn-premium btn-sm" onclick="callAI('quiz', 'quizPrompt', 'quiz-result', {difficulty: document.getElementById('quizDifficulty').value, quiz_type: document.getElementById('quizType').value})">Generate Quiz</button>
+                    
+                    <div id="loader-quiz" class="loader"></div>
+                    <div id="quiz-result" class="result-box mt-4">Your quiz layout will show here. Good Luck!</div>
+                </div>
+            </div>
+
+            <!-- TAB 6: LEARNING ROADMAP -->
+            <div id="roadmap-module" class="module-view">
+                <h3>Mastery Roadmaps</h3>
+                <p class="text-muted">Map your weekly goals, select learning resources, and setup practical projects.</p>
+                <div class="glass p-4 mt-4">
+                    <div class="mb-3">
+                        <label for="roadmapPrompt" class="form-label">Skill or Topic to Master</label>
+                        <input type="text" id="roadmapPrompt" class="form-control" placeholder="E.g., Docker, Data Science, Machine Learning">
+                    </div>
+                    <button class="btn btn-premium btn-sm" onclick="callAI('roadmap', 'roadmapPrompt', 'roadmapResult')">Build Learning Roadmap</button>
+                    
+                    <div id="loader-roadmap" class="loader"></div>
+                    <div id="roadmapResult" class="result-box mt-4">Weekly roadmap modules will populate here...</div>
+                </div>
+            </div>
+
+            <!-- TAB 7: SUMMARIZER -->
+            <div id="summarize-module" class="module-view">
+                <h3>Text Summarizer</h3>
+                <p class="text-muted">Paste large chapters or upload documentation notes to get a dense summary and key points.</p>
+                <div class="glass p-4 mt-4">
+                    <div class="mb-3">
+                        <label for="summarizePrompt" class="form-label">Paste text here</label>
+                        <textarea id="summarizePrompt" class="form-control" rows="8" placeholder="Paste notes content here..."></textarea>
+                    </div>
+                    
+                    <div class="row align-items-center mb-3">
+                        <div class="col-md-6 mb-3 mb-md-0">
+                            <label for="summarizeType" class="form-label">Summary Type</label>
+                            <select id="summarizeType" class="form-select">
+                                <option value="Detailed Summary" selected>Detailed Summary (Key bullet points + index terms)</option>
+                                <option value="Short Summary">Short Summary (Brief overview)</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Or upload document</label>
+                            <input type="file" class="form-control" id="summarizeFile" accept=".txt,.pdf,.docx" onchange="showToast('File attached successfully (simulated upload).', 'success')">
+                        </div>
+                    </div>
+                    
+                    <button class="btn btn-premium btn-sm mt-2" onclick="callAI('summarize', 'summarizePrompt', 'summarizeResult', {difficulty: document.getElementById('summarizeType').value})">Summarize Notes</button>
+                    
+                    <div id="loader-summarize" class="loader"></div>
+                    <div id="summarizeResult" class="result-box mt-4">Summary will populate here...</div>
+                </div>
+            </div>
+
+            <!-- TAB 8: HOMEWORK ASSISTANT -->
+            <div id="homework-module" class="module-view">
+                <h3>Homework Solver</h3>
+                <p class="text-muted">Stuck on a tricky math equation or science diagram? Submit details and get step-by-step explanations.</p>
+                <div class="glass p-4 mt-4">
+                    <div class="mb-3">
+                        <label for="homeworkPrompt" class="form-label">Describe the problem</label>
+                        <textarea id="homeworkPrompt" class="form-control" rows="4" placeholder="E.g., Solve for x: 3x^2 - 12x + 9 = 0. Show the derivation."></textarea>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="homeworkContext" class="form-label">Special Constraints / Guidelines</label>
+                            <input type="text" id="homeworkContext" class="form-control" placeholder="E.g. Use the quadratic formula only">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Attach image of problem</label>
+                            <input type="file" class="form-control" id="homeworkFile" accept="image/*" onchange="showToast('Diagram image uploaded (mock preview enabled).', 'success')">
+                        </div>
+                    </div>
+                    <button class="btn btn-premium btn-sm mt-2" onclick="callAI('homework', 'homeworkPrompt', 'homeworkResult', {context: document.getElementById('homeworkContext').value})">Solve Problem</button>
+                    
+                    <div id="loader-homework" class="loader"></div>
+                    <div id="homeworkResult" class="result-box mt-4">Step-by-step calculations will stream here...</div>
+                </div>
+            </div>
+
+            <!-- TAB 9: FLASHCARDS -->
+            <div id="flashcards-module" class="module-view">
+                <h3>Revision Flashcards</h3>
+                <p class="text-muted">Enter a topic, and EduGenie will create custom Q&A cards to help you test your recall memory.</p>
+                <div class="glass p-4 mt-4 text-center">
+                    <div class="row justify-content-center text-start mb-3">
+                        <div class="col-md-6 mb-3">
+                            <label for="flashcardPrompt" class="form-label">Card Deck Topic</label>
+                            <input type="text" id="flashcardPrompt" class="form-control" placeholder="E.g. Web Development protocols, Anatomy terms">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="flashcardDifficulty" class="form-label">Complexity</label>
+                            <select id="flashcardDifficulty" class="form-select">
+                                <option value="Easy">Basic Concepts</option>
+                                <option value="Medium" selected>Intermediate Details</option>
+                                <option value="Hard">Advanced Terms</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button class="btn btn-premium btn-sm" onclick="callAI('flashcards', 'flashcardPrompt', 'flashcard-result', {difficulty: document.getElementById('flashcardDifficulty').value})">Generate Flashcards</button>
+                    
+                    <div id="loader-flashcards" class="loader"></div>
+                    <div id="flashcard-result" class="result-box mt-4 bg-transparent border-0">Your flashcard deck will load here. Click a card to reveal its back.</div>
+                </div>
+            </div>
+
+            <!-- TAB: DOCUMENT & PDF AI STUDY CENTER -->
+            <div id="document-module" class="module-view">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <div>
+                        <h3 class="fw-bold mb-1"><i class="fas fa-file-pdf text-danger me-2"></i>Document & PDF AI Study Center</h3>
+                        <p class="text-muted small m-0">Upload PDF textbooks, lecture slides, research papers, or Word docs. Extract text, ask questions, generate custom summaries, quizzes, and flashcards.</p>
+                    </div>
+                    <button class="btn btn-sm btn-outline-primary" onclick="loadUserDocuments()">
+                        <i class="fas fa-sync-alt me-1"></i> Refresh Docs
+                    </button>
+                </div>
+
+                <!-- Drag & Drop Upload Zone -->
+                <div class="glass p-4 mb-4" id="docDropZone">
+                    <div class="doc-upload-box text-center p-4 border border-dashed rounded-4" style="border-color: var(--primary) !important; background: rgba(108, 99, 255, 0.05); cursor: pointer;" onclick="document.getElementById('docFileInput').click()">
+                        <input type="file" id="docFileInput" style="display: none;" accept=".pdf,.docx,.doc,.txt,.md" onchange="handleFileSelected(event)">
+                        <div class="upload-icon mb-3">
+                            <i class="fas fa-cloud-upload-alt text-gradient fa-3x"></i>
+                        </div>
+                        <h5 class="fw-bold mb-1">Drag & drop your study file here, or <span class="text-primary text-decoration-underline">browse files</span></h5>
+                        <p class="text-muted small mb-2">Supports PDF, DOCX, TXT, Markdown (Max 15MB)</p>
+                        <div class="d-flex justify-content-center gap-2 mt-2">
+                            <span class="badge bg-secondary"><i class="fas fa-file-pdf text-danger me-1"></i>PDF</span>
+                            <span class="badge bg-secondary"><i class="fas fa-file-word text-info me-1"></i>DOCX</span>
+                            <span class="badge bg-secondary"><i class="fas fa-file-alt text-warning me-1"></i>TXT / MD</span>
+                        </div>
+                    </div>
+                    <!-- Upload Progress Bar (hidden by default) -->
+                    <div id="docUploadProgress" class="progress mt-3" style="display: none; height: 10px; border-radius: 5px;">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-primary" role="progressbar" style="width: 100%;"></div>
+                    </div>
+                </div>
+
+                <!-- Main Two-Column Document Workspace -->
+                <div class="row">
+                    <!-- Left Column: Document Library -->
+                    <div class="col-lg-4 mb-4">
+                        <div class="glass p-3 h-100 d-flex flex-column" style="min-height: 480px;">
+                            <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom border-secondary">
+                                <h6 class="fw-bold m-0"><i class="fas fa-folder-open text-warning me-2"></i>My Documents (<span id="docCountBadge">0</span>)</h6>
+                            </div>
+                            <!-- Search docs -->
+                            <div class="input-group input-group-sm mb-3">
+                                <span class="input-group-text bg-transparent border-secondary text-muted"><i class="fas fa-search"></i></span>
+                                <input type="text" id="docSearchInput" class="form-control form-control-sm bg-transparent border-secondary text-white" placeholder="Filter documents..." oninput="filterDocumentList()">
+                            </div>
+                            <!-- Document List Container -->
+                            <div id="documentListContainer" class="flex-grow-1 overflow-auto pe-1" style="max-height: 400px;">
+                                <!-- Populated dynamically by JS -->
+                                <div class="text-center py-5 text-muted small">
+                                    <i class="fas fa-file-alt fa-2x mb-2 opacity-50"></i>
+                                    <p>No documents uploaded yet.<br>Drag & drop a PDF above to begin!</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Document Viewer & AI Actions -->
+                    <div class="col-lg-8 mb-4">
+                        <!-- Active Document Workspace (Positioned beside My Documents box) -->
+                        <div id="docActiveWorkspace" class="glass p-4 h-100 d-flex flex-column" style="min-height: 480px;">
+                            <!-- Doc Header -->
+                            <div class="d-flex flex-wrap justify-content-between align-items-center pb-3 mb-3 border-bottom border-secondary gap-2">
+                                <div>
+                                    <h5 class="fw-bold m-0 text-gradient text-truncate" id="activeDocTitle" style="max-width: 380px;">Document Analysis Workspace</h5>
+                                    <div class="d-flex align-items-center gap-2 mt-1">
+                                        <span class="badge bg-primary" id="activeDocBadge">Ready</span>
+                                        <small class="text-muted" id="activeDocMeta">Select a document from library to analyze</small>
+                                    </div>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <button class="btn btn-sm btn-outline-danger" id="activeDocDeleteBtn" onclick="deleteActiveDocument()" title="Delete document" style="display: none;">
+                                        <i class="fas fa-trash-alt me-1"></i> Delete
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Document AI Workspace Tabs -->
+                            <ul class="nav nav-pills nav-fill mb-3 gap-2" id="docTabs" role="tablist">
+                                <li class="nav-item">
+                                    <button class="nav-link active btn-sm" id="tabDocReader" onclick="switchDocTab('reader')">
+                                        <i class="fas fa-eye me-1"></i> Reader
+                                    </button>
+                                </li>
+                                <li class="nav-item">
+                                    <button class="nav-link btn-sm" id="tabDocSummary" onclick="switchDocTab('summary')">
+                                        <i class="fas fa-file-contract me-1"></i> AI Summary
+                                    </button>
+                                </li>
+                                <li class="nav-item">
+                                    <button class="nav-link btn-sm" id="tabDocQA" onclick="switchDocTab('qa')">
+                                        <i class="fas fa-comment-dots me-1"></i> Ask Doc (Q&A)
+                                    </button>
+                                </li>
+                                <li class="nav-item">
+                                    <button class="nav-link btn-sm" id="tabDocQuiz" onclick="switchDocTab('quiz')">
+                                        <i class="fas fa-question-circle me-1"></i> Doc Quiz
+                                    </button>
+                                </li>
+                                <li class="nav-item">
+                                    <button class="nav-link btn-sm" id="tabDocFlashcards" onclick="switchDocTab('flashcards')">
+                                        <i class="fas fa-clone me-1"></i> Flashcards
+                                    </button>
+                                </li>
+                            </ul>
+
+                            <!-- Workspace Panes -->
+                            <div class="flex-grow-1">
+                                <!-- PANE 1: Reader -->
+                                <div id="docPaneReader" class="doc-pane">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="text-muted small">Extracted Document Text</span>
+                                        <button class="btn btn-sm btn-outline-secondary py-0 px-2" onclick="copyExtractedText()">
+                                            <i class="fas fa-copy me-1"></i> Copy All
+                                        </button>
+                                    </div>
+                                    <div id="docExtractedTextContainer" class="p-3 rounded-3 overflow-auto" style="max-height: 380px; background: rgba(0,0,0,0.25); border: 1px solid var(--glass-border); font-size: 0.9rem; line-height: 1.6; white-space: pre-wrap;">
+                                    </div>
+                                </div>
+
+                                <!-- PANE 2: AI Summary -->
+                                <div id="docPaneSummary" class="doc-pane" style="display: none;">
+                                    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <label class="text-muted small m-0">Summary Type:</label>
+                                            <select id="docSummaryType" class="form-select form-select-sm" style="width: 170px;">
+                                                <option value="Comprehensive" selected>Comprehensive</option>
+                                                <option value="Executive Brief">Executive Brief</option>
+                                                <option value="Exam Cheat-Sheet">Exam Cheat-Sheet</option>
+                                                <option value="Bullet Points">Key Bullet Points</option>
+                                            </select>
+                                        </div>
+                                        <button class="btn btn-sm btn-premium" onclick="generateDocSummary()">
+                                            <i class="fas fa-bolt me-1"></i> Generate AI Summary
+                                        </button>
+                                    </div>
+                                    <div id="loader-doc-summary" class="loader" style="display: none;"></div>
+                                    <div id="docSummaryResult" class="result-box overflow-auto" style="max-height: 350px;">
+                                        Click "Generate AI Summary" to create a structured breakdown of this document.
+                                    </div>
+                                </div>
+
+                                <!-- PANE 3: Ask Doc (Q&A) -->
+                                <div id="docPaneQA" class="doc-pane" style="display: none;">
+                                    <!-- Prompt chips -->
+                                    <div class="d-flex flex-wrap gap-1 mb-2">
+                                        <span class="text-muted small me-1 align-self-center">Suggested:</span>
+                                        <button class="btn btn-sm btn-outline-secondary py-0 px-2 rounded-pill small" onclick="setDocPrompt('What are the main findings or arguments in this document?')">Key Arguments</button>
+                                        <button class="btn btn-sm btn-outline-secondary py-0 px-2 rounded-pill small" onclick="setDocPrompt('List the key formulas, definitions, and equations mentioned.')">Formulas & Terms</button>
+                                        <button class="btn btn-sm btn-outline-secondary py-0 px-2 rounded-pill small" onclick="setDocPrompt('Summarize the conclusion and practical implications.')">Conclusions</button>
+                                    </div>
+                                    <!-- QA Chat Area -->
+                                    <div id="docQAChatContainer" class="p-3 rounded-3 overflow-auto mb-3" style="height: 250px; background: rgba(0,0,0,0.25); border: 1px solid var(--glass-border);">
+                                        <div class="message-bubble assistant">
+                                            <div class="message-avatar">EG</div>
+                                            <div class="message-content">Ask me any question about this document! I will answer based specifically on its contents.</div>
+                                        </div>
+                                    </div>
+                                    <div id="loader-doc-qa" class="loader" style="display: none;"></div>
+                                    <div class="input-group">
+                                        <input type="text" id="docQAPrompt" class="form-control" placeholder="Ask about this document..." onkeydown="if(event.key==='Enter') askDocQuestion()">
+                                        <button class="btn btn-premium px-3" onclick="askDocQuestion()">
+                                            <i class="fas fa-paper-plane"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- PANE 4: Quiz from Document -->
+                                <div id="docPaneQuiz" class="doc-pane" style="display: none;">
+                                    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+                                        <div class="d-flex align-items-center gap-2">
+                                            <select id="docQuizDifficulty" class="form-select form-select-sm" style="width: 120px;">
+                                                <option value="Easy">Easy</option>
+                                                <option value="Medium" selected>Medium</option>
+                                                <option value="Hard">Hard</option>
+                                            </select>
+                                            <select id="docQuizCount" class="form-select form-select-sm" style="width: 130px;">
+                                                <option value="3">3 Questions</option>
+                                                <option value="5" selected>5 Questions</option>
+                                            </select>
+                                        </div>
+                                        <button class="btn btn-sm btn-premium" onclick="generateDocQuiz()">
+                                            <i class="fas fa-magic me-1"></i> Generate Quiz
+                                        </button>
+                                    </div>
+                                    <div id="loader-doc-quiz" class="loader" style="display: none;"></div>
+                                    <div id="docQuizContainer" class="result-box overflow-auto" style="max-height: 350px;">
+                                        Click "Generate Quiz" to test your comprehension on this document.
+                                    </div>
+                                </div>
+
+                                <!-- PANE 5: Flashcards from Document -->
+                                <div id="docPaneFlashcards" class="doc-pane" style="display: none;">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <span class="text-muted small">Study flashcards synthesized from document terms</span>
+                                        <button class="btn btn-sm btn-premium" onclick="generateDocFlashcards()">
+                                            <i class="fas fa-clone me-1"></i> Generate Flashcards
+                                        </button>
+                                    </div>
+                                    <div id="loader-doc-flashcards" class="loader" style="display: none;"></div>
+                                    <div id="docFlashcardsContainer" class="result-box text-center overflow-auto" style="max-height: 350px;">
+                                        Click "Generate Flashcards" to create interactive study cards.
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 10: BOOKMARKS & NOTES -->
+            <div id="bookmarks-module" class="module-view">
+                <h3>My Library</h3>
+                <p class="text-muted">Manage all saved notes, summaries, and bookmarked questions in one secure dashboard.</p>
+                
+                <ul class="nav nav-tabs mt-4" id="libraryTabs" role="tablist">
+                    <li class="nav-item">
+                        <button class="nav-link active bg-transparent border-0 text-white" id="notes-tab" data-bs-toggle="tab" data-bs-target="#notes-pane" type="button">Saved Notes</button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link bg-transparent border-0 text-white" id="bookmarks-tab" data-bs-toggle="tab" data-bs-target="#bookmarks-pane" type="button">Bookmarks</button>
+                    </li>
+                    <li class="nav-item">
+                        <button class="nav-link bg-transparent border-0 text-white" id="history-tab" data-bs-toggle="tab" data-bs-target="#history-pane" type="button">Activity Logs</button>
+                    </li>
+                </ul>
+                
+                <div class="tab-content glass p-4 mt-3" style="min-height: 350px;">
+                    <!-- Notes Pane -->
+                    <div class="tab-pane fade show active" id="notes-pane">
+                        <h5 class="mb-3 text-gradient">Your Study Notes</h5>
+                        <div class="row" id="notes-grid">
+                            <!-- Populated via JS -->
+                        </div>
+                    </div>
+                    
+                    <!-- Bookmarks Pane -->
+                    <div class="tab-pane fade" id="bookmarks-pane">
+                        <h5 class="mb-3 text-gradient">Saved Bookmarks</h5>
+                        <div id="bookmarks-list">
+                            <!-- Populated via JS -->
+                        </div>
+                    </div>
+                    
+                    <!-- Activity History Pane -->
+                    <div class="tab-pane fade" id="history-pane">
+                        <h5 class="mb-3 text-gradient">Recent Prompt Logs</h5>
+                        <div id="history-list">
+                            <!-- Populated via JS -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 11: PROFILE -->
+            <div id="profile-module" class="module-view">
+                <h3>My Learning Profile</h3>
+                <p class="text-muted">Manage your credentials, educational details, study streak status, and accomplishments.</p>
+                <div class="row mt-4">
+                    <div class="col-md-4 mb-4">
+                        <div class="glass p-4 text-center">
+                            <div class="mb-3">
+                                <div class="rounded-circle bg-primary text-white mx-auto d-flex align-items-center justify-content-center" style="width: 90px; height: 90px; font-size: 2.2rem; font-weight: 700;">
+                                    EG
+                                </div>
+                            </div>
+                            <h4 class="user-display-name">Alex Learner</h4>
+                            <span class="badge bg-secondary mb-3 user-display-email">demo@edugenie.com</span>
+                            <div class="border-top border-secondary pt-3 mt-2 text-start">
+                                <h6 class="fw-bold"><i class="fas fa-award text-warning me-2"></i>Achievements</h6>
+                                <p class="text-muted small mt-2">✓ Verified Student Certificate</p>
+                                <p class="text-muted small">✓ Master of 3+ Coding Quizzes</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-8 mb-4">
+                        <form onsubmit="updateProfileDetails(event)" class="glass p-4">
+                            <h5 class="mb-4 text-gradient">Academic Settings</h5>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3 form-group">
+                                    <label for="profileName">Full Name</label>
+                                    <input type="text" id="profileName" class="form-control" required>
+                                </div>
+                                <div class="col-md-6 mb-3 form-group">
+                                    <label for="profileEducation">Education Tier</label>
+                                    <input type="text" id="profileEducation" class="form-control" placeholder="E.g. University Undergraduate">
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3 form-group">
+                                <label for="profileSkills">My Skills (Comma separated)</label>
+                                <input type="text" id="profileSkills" class="form-control" placeholder="E.g. Python, SQL, Physics, Essay Writing">
+                            </div>
+                            
+                            <div class="mb-4 form-group">
+                                <label for="profileAchievements">Key Milestones / Goals</label>
+                                <input type="text" id="profileAchievements" class="form-control" placeholder="E.g. Master algorithms, Complete SQL certification">
+                            </div>
+                            
+                            <button type="submit" id="profileSaveBtn" class="btn btn-premium">Save Changes</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 12: AI SETTINGS -->
+            <div id="settings-module" class="module-view">
+                <h3>AI Model Configurations</h3>
+                <p class="text-muted">Fine-tune the generative AI settings. Adjust temperature, token size limit, or select from fallback local engines.</p>
+                
+                <form onsubmit="saveSettings(event)" class="glass p-4 mt-4" style="max-width: 600px;">
+                    <div class="mb-4 form-group">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <label for="settingsModel" class="mb-0">AI Model Engine</label>
+                            <span class="badge bg-success-subtle text-success border border-success" id="ollamaStatusBadge"><i class="fas fa-check-circle me-1"></i>Ollama Local AI</span>
+                        </div>
+                        <select id="settingsModel" class="form-select">
+                            <option value="llama3.2">Ollama: llama3.2 (Installed Local Model - Recommended)</option>
+                            <option value="llama3.2:latest">Ollama: llama3.2:latest</option>
+                            <option value="llama3.1">Ollama: llama3.1</option>
+                            <option value="mistral">Ollama: mistral</option>
+                            <option value="qwen2.5">Ollama: qwen2.5</option>
+                            <option value="llama-3.3-70b-versatile">Cloud: Llama 3.3 70B (Groq Cloud)</option>
+                        </select>
+                        <small class="text-muted d-block mt-1"><i class="fas fa-robot me-1"></i>Powered by your local Ollama daemon (127.0.0.1:11434) with zero cloud API keys needed.</small>
+                    </div>
+                    
+                    <div class="mb-4 form-group">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <label for="settingsTemp">Temperature (Creativity): <span id="settingsTempVal" class="text-primary font-weight-bold">0.7</span></label>
+                        </div>
+                        <input type="range" class="form-range" min="0" max="1" step="0.1" id="settingsTemp" value="0.7">
+                        <small class="text-muted d-block mt-1">Lower values are focused and deterministic; higher values are creative and analytical.</small>
+                    </div>
+                    
+                    <div class="mb-4 form-group">
+                        <label for="settingsTokens">Max Tokens Limit</label>
+                        <input type="number" class="form-control" id="settingsTokens" value="2048" min="256" max="4096">
+                        <small class="text-muted">Controls the maximum size of generated response characters.</small>
+                    </div>
+                    
+                    <button type="submit" id="settingsSaveBtn" class="btn btn-premium">Save AI Preferences</button>
+                </form>
+            </div>
+
+            <!-- TAB 13: ADMIN PANEL -->
+            <div id="admin-module" class="module-view">
+                <h3 class="text-danger"><i class="fas fa-shield-alt me-2"></i>Admin Management Console</h3>
+                <p class="text-muted">Global dashboard statistics, system logs, feedback records, and user analytical trends.</p>
+                
+                <div class="row mt-4 mb-4">
+                    <div class="col-md-3 mb-3">
+                        <div class="glass-card stat-card border-danger">
+                            <div class="stat-icon bg-danger text-white"><i class="fas fa-users"></i></div>
+                            <div>
+                                <h4 class="m-0" id="adminTotalUsers">0</h4>
+                                <small class="text-muted">Total Accounts</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="glass-card stat-card border-warning">
+                            <div class="stat-icon bg-warning text-dark"><i class="fas fa-envelope"></i></div>
+                            <div>
+                                <h4 class="m-0" id="adminTotalFeedback">0</h4>
+                                <small class="text-muted">User Feedback</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="glass-card stat-card border-info">
+                            <div class="stat-icon bg-info text-white"><i class="fas fa-terminal"></i></div>
+                            <div>
+                                <h4 class="m-0" id="adminTotalQueries">0</h4>
+                                <small class="text-muted">Total Prompt Logs</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <div class="glass-card stat-card border-success">
+                            <div class="stat-icon bg-success text-white"><i class="fas fa-clipboard-list"></i></div>
+                            <div>
+                                <h4 class="m-0" id="adminTotalQuizzes">0</h4>
+                                <small class="text-muted">Total Quizzes</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts Row -->
+                <div class="row mb-5">
+                    <div class="col-lg-6 mb-4">
+                        <div class="glass p-4 h-100">
+                            <h5 class="fw-bold mb-3">New Signups Growth (7-Day Period)</h5>
+                            <div style="position: relative; height: 260px;">
+                                <canvas id="userGrowthChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 mb-4">
+                        <div class="glass p-4 h-100">
+                            <h5 class="fw-bold mb-3">Module Invocation Frequency</h5>
+                            <div style="position: relative; height: 260px;">
+                                <canvas id="moduleUsageChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Admin Tables Tabs -->
+                <ul class="nav nav-tabs" id="adminTabNav">
+                    <li class="nav-item"><button class="nav-link active text-white bg-transparent border-0" data-bs-toggle="tab" data-bs-target="#admin-logs-pane">System Logs</button></li>
+                    <li class="nav-item"><button class="nav-link text-white bg-transparent border-0" data-bs-toggle="tab" data-bs-target="#admin-users-pane">User List</button></li>
+                    <li class="nav-item"><button class="nav-link text-white bg-transparent border-0" data-bs-toggle="tab" data-bs-target="#admin-feedback-pane">Feedback Messages</button></li>
+                </ul>
+                <div class="tab-content glass p-4 mt-3" style="min-height: 250px;">
+                    <div class="tab-pane fade show active" id="admin-logs-pane">
+                        <div class="table-responsive">
+                            <table class="table table-dark table-hover align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>User Email</th>
+                                        <th>Module</th>
+                                        <th>Prompt Snippet</th>
+                                        <th>Timestamp</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-prompt-logs"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="admin-users-pane">
+                        <div class="table-responsive">
+                            <table class="table table-dark table-hover align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>Role</th>
+                                        <th>Streak</th>
+                                        <th>Created At</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-users-table"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="admin-feedback-pane">
+                        <div class="table-responsive">
+                            <table class="table table-dark table-hover align-middle">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Name</th>
+                                        <th>Email</th>
+                                        <th>Message</th>
+                                        <th>Submitted</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="admin-feedback-table"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/particles.js/2.0.0/particles.min.js"></script>
+    <script src="/static/js/particles-config.js"></script>
+    <script src="/static/js/main.js"></script>
+    <script>
+        if (typeof particlesJS !== 'undefined') {
+            particlesJS("particles-js", particlesConfig);
+        }
+    </script>
+</body>
+</html>

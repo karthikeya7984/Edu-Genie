@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    environment:
+      - DATABASE_URL=sqlite:///./edugenie.db
+      - SECRET_KEY=949f2b347209ae84d2938e21a293b4aef9e2819cd30ef30aee4919cbcd3f39a0
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
